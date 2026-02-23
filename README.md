@@ -43,8 +43,7 @@ It allows users to search for real-time weather data and a 5-day forecast by loc
    cd backend
 Install the required dependencies:
 
-npm install express cors pg
-Open server.js and update the PostgreSQL connection pool with your local database credentials.
+npm install 
 
 Update the YouTube API fetch URL in server.js with your actual API key.
 
