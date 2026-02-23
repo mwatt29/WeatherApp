@@ -50,4 +50,51 @@ app.get('/api/export', async (req, res) => {
 
 // Note: UPDATE and DELETE routes would follow similar pg.query patterns 
 
+// UPDATE: Allow users to update weather information
+app.put('/api/weather/:id', async (req, res) => {
+  const { id } = req.params;
+  const { location, temperature } = req.body;
+  try {
+    if (!location) {
+      return res.status(400).json({ error: 'Location cannot be empty' });
+    }
+    const result = await pool.query(
+      'UPDATE weather_records SET location = $1, average_temperature = $2 WHERE id = $3 RETURNING *',
+      [location, temperature, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update record' });
+  }
+});
+
+// DELETE: Allow users to delete records
+app.delete('/api/weather/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM weather_records WHERE id = $1', [id]);
+    res.json({ message: 'Record deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete record' });
+  }
+});
+
+// API INTEGRATION: Fetch a YouTube video related to the location
+app.get('/api/media/:location', async (req, res) => {
+  const { location } = req.params;
+  try {
+    // Requires a YouTube Data API v3 Key
+    const ytResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${location}+city+tour&key=YOUR_YOUTUBE_API_KEY&maxResults=1&type=video`);
+    const ytData = await ytResponse.json();
+    
+    if (ytData.items && ytData.items.length > 0) {
+      res.json({ videoId: ytData.items[0].id.videoId });
+    } else {
+      res.json({ videoId: null });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch media' });
+  }
+});
+
 app.listen(5000, () => console.log('Backend running on port 5000'));
