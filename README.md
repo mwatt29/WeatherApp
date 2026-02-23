@@ -12,7 +12,7 @@ It allows users to search for real-time weather data and a 5-day forecast by loc
 ### Tech Stack
 * **Frontend:** React.js, standard CSS (Responsive Design)
 * **Backend:** Node.js, Express.js
-* **Database:** PostgreSQL
+* **Database:** SQLite (Zero-configuration, auto-generated local database)
 * **External APIs:** OpenWeatherMap API, YouTube Data API v3
 
 ---
@@ -35,15 +35,10 @@ It allows users to search for real-time weather data and a 5-day forecast by loc
 
 ### Prerequisites
 * [Node.js](https://nodejs.org/) installed
-* [PostgreSQL](https://www.postgresql.org/) installed and running
 * API Keys for OpenWeatherMap and YouTube Data v3
 
-### 1. Database Setup
-1. Open your PostgreSQL terminal (psql) or GUI (like pgAdmin).
-2. Create a new database named `weather_db`.
-3. Run the SQL commands found in `database/init.sql` to create the `weather_records` table.
-
-### 2. Backend Setup
+### 1. Backend Setup
+*Note: SQLite is used for this project, meaning no external database installation is required. The database file (`weather.db`) will generate automatically upon starting the server.*
 1. Navigate to the backend directory:
    cd backend
 Install the required dependencies:
@@ -58,7 +53,7 @@ Start the backend server:
 node server.js
 The backend will run on http://localhost:5000.
 
-### 3. Frontend Setup
+### 2. Frontend Setup
 Open a new terminal window and navigate to the frontend directory:
 
 cd frontend
