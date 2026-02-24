@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DecryptedText from './DecryptedText';
 import './App.css';
 
 // Helper function to map Open-Meteo weather codes to standard weather icons
@@ -24,7 +25,7 @@ function App() {
     try {
       setError('');
       
-      // 1. Geocode using OpenStreetMap (Handles commas, states, and specific locations perfectly)
+      // 1. Geocode using OpenStreetMap
       const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&addressdetails=1`);
       const geoData = await geoRes.json();
       
@@ -34,16 +35,14 @@ function App() {
       
       const city = geoData[0];
       
-      // Extract a clean "City, State, Country" format from the OpenStreetMap address object
       const addr = city.address || {};
       const localName = addr.city || addr.town || addr.village || city.name;
       const cleanFullName = [localName, addr.state, addr.country].filter(Boolean).join(', ');
 
-      // 2. Fetch Weather (Open-Meteo) using the accurate coordinates
-      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto`);
+      // 2. Fetch Weather (Open-Meteo)
+      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`);
       const weatherApiData = await weatherRes.json();
 
-      // Format Current Data
       const currentData = {
         name: cleanFullName,
         temp: weatherApiData.current.temperature_2m,
@@ -51,12 +50,12 @@ function App() {
       };
       setWeatherData(currentData);
 
-      // Format 5-Day Forecast Data (Skip index 0 which is today)
       const dailyForecast = [];
       for (let i = 1; i <= 5; i++) {
         dailyForecast.push({
           date: weatherApiData.daily.time[i],
-          temp: weatherApiData.daily.temperature_2m_max[i],
+          maxTemp: weatherApiData.daily.temperature_2m_max[i],
+          minTemp: weatherApiData.daily.temperature_2m_min[i],
           icon: getWeatherIcon(weatherApiData.daily.weather_code[i])
         });
       }
@@ -64,14 +63,12 @@ function App() {
 
       // --- BACKEND SAFETY NET ---
       try {
-        // 3. Fetch YouTube Video (using just the local city name for a better search result)
         const mediaRes = await fetch(`http://localhost:5000/api/media/${localName}`);
         if (mediaRes.ok) {
           const mediaData = await mediaRes.json();
           setVideoId(mediaData.videoId);
         }
 
-        // 4. Save accurate name to Database
         await fetch('http://localhost:5000/api/weather', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -97,7 +94,9 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <h1>Weather Explorer</h1>
+        <h1>
+          <DecryptedText text="Weather Explorer" animateOn="view" revealDirection="center" speed={40} maxIterations={15} />
+        </h1>
         <p>Built by: Murray Watt</p>
         <p><em>Product Manager Accelerator is a premier program designed to help professionals transition into and accelerate their product management careers.</em></p>
       </header>
@@ -118,20 +117,32 @@ function App() {
         {weatherData && (
           <div className="results-container">
             <div className="current-weather">
-              <h2>{weatherData.name} - Current</h2>
+              <h2>
+                <DecryptedText text={`${weatherData.name} - Current`} animateOn="view" revealDirection="start" speed={50} maxIterations={20} />
+              </h2>
               <img src={`http://openweathermap.org/img/wn/${weatherData.icon}@2x.png`} alt="weather icon" />
-              <p>Temperature: {Math.round(weatherData.temp)}°C</p>
+              <p>
+                <DecryptedText text={`Temperature: ${Math.round(weatherData.temp)}°C`} animateOn="view" revealDirection="center" speed={60} maxIterations={12} />
+              </p>
             </div>
 
-            {/* 5-Day Forecast Grid */}
             <div className="forecast-section">
-              <h2>5-Day Forecast</h2>
-              <div>
+              <h2 className="section-title">
+                <DecryptedText text="5-Day Forecast" animateOn="view" revealDirection="end" speed={50} maxIterations={15} />
+              </h2>
+              <div className="forecast-grid">
                 {forecastData.map((day, index) => (
-                  <div key={index} className="forecast-card">
-                    <p>{new Date(day.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                    <img src={`http://openweathermap.org/img/wn/${day.icon}.png`} alt="icon" />
-                    <p>{Math.round(day.temp)}°C</p>
+                  <div key={index} className="forecast-card premium-card" style={{ '--animation-order': index }}>
+                    <div className="date-wrapper">
+                      <h3 className="day-name">{new Date(day.date).toLocaleDateString(undefined, { weekday: 'short' })}</h3>
+                      <p className="day-date">{new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                    </div>
+                    <img src={`http://openweathermap.org/img/wn/${day.icon}@2x.png`} alt="weather icon" className="forecast-icon" />
+                    <div className="temp-range">
+                      <span className="temp-max">{Math.round(day.maxTemp)}°</span>
+                      <span className="temp-divider">/</span>
+                      <span className="temp-min">{Math.round(day.minTemp)}°</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -139,10 +150,11 @@ function App() {
           </div>
         )}
 
-        {/* YouTube Integration */}
         {videoId && (
           <div className="media-section">
-            <h2>Explore {weatherData?.name}</h2>
+            <h2>
+              <DecryptedText text={`Explore ${weatherData?.name}`} animateOn="view" revealDirection="start" speed={40} maxIterations={15} />
+            </h2>
             <iframe 
               width="560" 
               height="315" 
