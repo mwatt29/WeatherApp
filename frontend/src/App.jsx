@@ -24,26 +24,32 @@ function App() {
     try {
       setError('');
       
-      // 1. Geocode the location (Open-Meteo Geocoding API - NO KEY NEEDED)
-      const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${location}&count=1`);
+      // 1. Geocode using OpenStreetMap (Handles commas, states, and specific locations perfectly)
+      const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&addressdetails=1`);
       const geoData = await geoRes.json();
       
-      if (!geoData.results || geoData.results.length === 0) {
-        throw new Error('City not found. Please try again.');
+      if (!geoData || geoData.length === 0) {
+        throw new Error('City not found. Please try adding a state or country.');
       }
-      const city = geoData.results[0];
+      
+      const city = geoData[0];
+      
+      // Extract a clean "City, State, Country" format from the OpenStreetMap address object
+      const addr = city.address || {};
+      const localName = addr.city || addr.town || addr.village || city.name;
+      const cleanFullName = [localName, addr.state, addr.country].filter(Boolean).join(', ');
 
-      // 2. Fetch Weather (Open-Meteo Weather API - NO KEY NEEDED)
-      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto`);
+      // 2. Fetch Weather (Open-Meteo) using the accurate coordinates
+      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto`);
       const weatherApiData = await weatherRes.json();
 
       // Format Current Data
       const currentData = {
-        name: city.name,
+        name: cleanFullName,
         temp: weatherApiData.current.temperature_2m,
         icon: getWeatherIcon(weatherApiData.current.weather_code)
       };
-      setWeatherData(currentData); // Render weather immediately!
+      setWeatherData(currentData);
 
       // Format 5-Day Forecast Data (Skip index 0 which is today)
       const dailyForecast = [];
@@ -54,24 +60,23 @@ function App() {
           icon: getWeatherIcon(weatherApiData.daily.weather_code[i])
         });
       }
-      setForecastData(dailyForecast); // Render forecast immediately!
+      setForecastData(dailyForecast);
 
       // --- BACKEND SAFETY NET ---
-      // If the YouTube API or SQLite DB fails, it won't crash the weather UI
       try {
-        // 3. Fetch YouTube Video from our Node backend (Still uses your YT key in server.js)
-        const mediaRes = await fetch(`http://localhost:5000/api/media/${city.name}`);
+        // 3. Fetch YouTube Video (using just the local city name for a better search result)
+        const mediaRes = await fetch(`http://localhost:5000/api/media/${localName}`);
         if (mediaRes.ok) {
           const mediaData = await mediaRes.json();
           setVideoId(mediaData.videoId);
         }
 
-        // 4. Save to Database (CREATE requirement)
+        // 4. Save accurate name to Database
         await fetch('http://localhost:5000/api/weather', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            location: city.name,
+            location: cleanFullName, 
             startDate: new Date().toISOString().split('T')[0],
             endDate: new Date().toISOString().split('T')[0],
             temperature: currentData.temp
@@ -101,7 +106,7 @@ function App() {
         <div className="search-section">
           <input 
             type="text" 
-            placeholder="Enter City..." 
+            placeholder="Enter City, State, or Country..." 
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
