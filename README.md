@@ -7,22 +7,23 @@ Built by: Murray Watt
 ## Project Overview
 This project is a full-stack weather application built for the PM Accelerator AI Engineer Intern Technical Assessment (completing both Frontend Assessment #1 and Backend Assessment #2). 
 
-It allows users to search for real-time weather data and a 5-day forecast by location. The backend handles data persistence (CRUD operations) using PostgreSQL, validating date ranges and locations. It also integrates with the YouTube API to provide contextual video content for the searched location and allows users to export weather records.
+It allows users to search for real-time weather data and a 5-day forecast by location. The backend handles data persistence (CRUD operations) using SQLite, validating date ranges and locations. It integrates with the YouTube API to provide contextual video content for the searched location and allows users to export weather records.
 
 ### Tech Stack
-* **Frontend:** React.js, standard CSS (Responsive Design)
+* **Frontend:** React.js, Framer Motion (Decrypted text animations), CSS (Premium Glassmorphism UI)
 * **Backend:** Node.js, Express.js
 * **Database:** SQLite (Zero-configuration, auto-generated local database)
-* **External APIs:** OpenWeatherMap API, YouTube Data API v3
+* **External APIs:** OpenStreetMap (Nominatim Geocoding), Open-Meteo API (Keyless live weather data), YouTube Data API v3
 
 ---
 
 ## Features Implemented
-* **Current Weather & 5-Day Forecast:** Fetches and displays real-time weather and a 5-day forecast based on user input.
-* **Error Handling:** Gracefully alerts the user if a city is not found or an API request fails.
-* **Responsive UI:** Adapts seamlessly to desktop and mobile views.
+* **Robust Geocoding:** Utilizes OpenStreetMap to distinguish between complex inputs (e.g., "Victoria, British Columbia" vs. "Victoria, Australia").
+* **Premium UI/UX:** Features a fully responsive glassmorphism aesthetic with cascading forecast cards and Matrix-style text decryption animations.
+* **Current Weather & 5-Day Forecast:** Fetches and displays real-time temperatures, highs/lows, and weather icons based on user input.
+* **Error Handling:** Gracefully alerts the user if a city is not found or an API request fails without crashing the UI.
 * **CRUD Operations:**
-  * **Create:** Automatically saves valid search queries, locations, and temperatures to the database.
+  * **Create:** Automatically saves valid search queries, localized names, and temperatures to the database.
   * **Read:** Retrieves all historical weather searches.
   * **Update:** Allows updating of specific weather records.
   * **Delete:** Allows removal of weather records.
@@ -35,46 +36,33 @@ It allows users to search for real-time weather data and a 5-day forecast by loc
 
 ### Prerequisites
 * [Node.js](https://nodejs.org/) installed
-* API Keys for OpenWeatherMap and YouTube Data v3
+* API Key for YouTube Data v3
 
 ### 1. Backend Setup
 *Note: SQLite is used for this project, meaning no external database installation is required. The database file (`weather.db`) will generate automatically upon starting the server.*
+
 1. Navigate to the backend directory:
    cd backend
 Install the required dependencies:
 
 npm install 
-
-Update the YouTube API fetch URL in server.js with your actual API key.
+Open server.js and replace YOUR_YOUTUBE_API_KEY with your actual API key.
 
 Start the backend server:
 
 node server.js
 The backend will run on http://localhost:5000.
 
-### 2. Frontend Setup
+2. Frontend Setup
+Note: Open-Meteo and OpenStreetMap are used for weather and geocoding, which do not require API keys to run locally.
+
 Open a new terminal window and navigate to the frontend directory:
 
 cd frontend
-Install the required dependencies:
+Install the required dependencies (including Framer Motion for UI animations):
 
 npm install
-Open src/App.jsx and replace YOUR_OWM_API_KEY with your actual OpenWeatherMap API key.
-
 Start the React development server:
 
 npm start
-The frontend will run on http://localhost:3000.
-
-How to Use the App
-Open http://localhost:3000 in your browser.
-
-Enter a city name, zip code, or landmark in the search bar.
-
-Click Get Weather & Info.
-
-The app will display the current temperature, a weather icon, a 5-day forecast grid, and a YouTube video related to that location.
-
-Behind the scenes, the search data is automatically logged to your local PostgreSQL database via the Express backend.
-
-To test the export functionality, navigate to http://localhost:5000/api/export in your browser to download a JSON file of your database records.
+The frontend will run on http://localhost:3000
