@@ -63,13 +63,14 @@ function App() {
 
       // --- BACKEND SAFETY NET ---
       try {
-        const mediaRes = await fetch(`http://localhost:5000/api/media/${localName}`);
+        const mediaRes = await fetch(`http://localhost:5001/api/media/${localName}`);
         if (mediaRes.ok) {
           const mediaData = await mediaRes.json();
           setVideoId(mediaData.videoId);
         }
 
-        await fetch('http://localhost:5000/api/weather', {
+        await fetch('http://localhost:5001/api/weather', {
+
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
