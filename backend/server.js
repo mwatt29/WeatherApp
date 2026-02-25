@@ -74,8 +74,8 @@ app.delete('/api/weather/:id', (req, res) => {
 app.get('/api/media/:location', async (req, res) => {
   const { location } = req.params;
   try {
-    // Remember to replace YOUR_YOUTUBE_API_KEY with your actual key
-    const ytResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${location}+city+tour&key=AIzaSyDZ1m7HnjJKIjjcUXG1NUnF1OhKQXMwFkE&maxResults=1&type=video`);
+    // Remember to replace YOUR_YOUTUBE_API_KEY with your actual key locally, but NEVER commit it
+    const ytResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${location}+city+tour&key=YOUR_YOUTUBE_API_KEY&maxResults=1&type=video`);
     const ytData = await ytResponse.json();
     
     if (ytData.items && ytData.items.length > 0) {
