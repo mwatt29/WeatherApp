@@ -75,7 +75,7 @@ app.get('/api/media/:location', async (req, res) => {
   const { location } = req.params;
   try {
     // Remember to replace YOUR_YOUTUBE_API_KEY with your actual key
-    const ytResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${location}+city+tour&key=YOUR_YOUTUBE_API_KEY&maxResults=1&type=video`);
+    const ytResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${location}+city+tour&key=AIzaSyDZ1m7HnjJKIjjcUXG1NUnF1OhKQXMwFkE&maxResults=1&type=video`);
     const ytData = await ytResponse.json();
     
     if (ytData.items && ytData.items.length > 0) {
@@ -98,4 +98,4 @@ app.get('/api/export', (req, res) => {
   });
 });
 
-app.listen(5000, () => console.log('Backend running on port 5000'));
+app.listen(5001, () => console.log('Backend running on port 5001'));
